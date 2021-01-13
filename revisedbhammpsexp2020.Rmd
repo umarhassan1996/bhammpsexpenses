@@ -1,0 +1,45 @@
+---
+title: "mpsexpbham2020"
+author: "Umar Hassan"
+date: "12 January 2021"
+output: html_document
+---
+
+#Load the libraries to do my analysis
+```{r}
+library(tidyverse)
+library(sqldf)
+```
+
+
+#Load the revised dataset, covering just one year (2020)
+
+```{r}
+mpsexp2020 <- read.csv("Individual_claims_for_2020.csv", stringsAsFactors = FALSE)
+mpsexp20202 <- read.csv("Individual_claims_for_20_21.csv", stringsAsFactors = FALSE)
+mpsexp20bham <- read.csv("indclaimsbhammps2020.csv", stringsAsFactors = FALSE)
+```
+
+#Remove the periods using gsub and regex.
+```{r}
+colnames(mpsexp20bham) <- gsub("[.]", "",colnames(mpsexp20bham))
+colnames(mpsexp2020) <- gsub("[.]", "",colnames(mpsexp2020))
+colnames(mpsexp20202) <- gsub("[., ï]", "",colnames(mpsexp20202))
+```
+
+#Let's find out which Birmingham MPs have claimed the most in expenses.
+
+```{r}
+#The first dataset for Birmingham MPs
+bhammpsexp <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                    FROM mpsexp20bham
+                    WHERE MPsConstituency LIKE "%Birmingham%" 
+                    OR MPsConstituency LIKE "%Sutton Coldfield%"
+                    GROUP BY MPsName
+                    ORDER BY SUM(AmountClaimed) DESC')
+
+
+```
+
+#Let's join the tables to
+

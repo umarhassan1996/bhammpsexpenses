@@ -1,0 +1,256 @@
+---
+title: "bhammpsexp1617to2021"
+author: "Umar Hassan"
+date: "28 December 2020"
+output: html_document
+---
+
+##Now, that we know who are the "big beasts" of Birmingham MPs who have claimed the most amount in expenses for the latest year. To give a more clear indicator of this subject, I will cover this over a five-year window, which covers 2016/17 to 2020/21.
+
+First, let's load the libraries we will need to do our analysis, including the SQLDF package.
+
+```{r}
+##Select the libraries which will be used to do the analysis and visualisation in R.
+
+library(sqldf)
+library(tidyverse)
+```
+
+Time to use a bit of regex by using gsub to remove the periods in the datasets covering these years. However, we need to bring in the datasets to focus on first and store them in separate variables.
+
+```{r}
+#Store the MPs expenses dataset into separate variables.
+mpsexp1617 <- read.csv("Individual_claims_for_16_17.csv", stringsAsFactors = FALSE)
+mpsexp1718 <- read.csv("Individual_claims_for_17_18.csv", stringsAsFactors = FALSE)
+mpsexp1819 <- read.csv("Individual_claims_for_18_19.csv", stringsAsFactors = FALSE)
+mpsexp1920 <- read.csv("Individual_claims_for_19_20.csv", stringsAsFactors = FALSE)
+mpsexp2021 <- read.csv("Individual_claims_for_20_21.csv", stringsAsFactors = FALSE)
+
+```
+
+#Remove the periods using gsub. First, we need to do this for all the datasets we have loaded as variables.
+
+```{r}
+gsub("[., ï]", "",colnames(mpsexp1617))
+
+#Time to add this to the column names using the colnames function.
+colnames(mpsexp1617) <- gsub("[., ï]", "",colnames(mpsexp1617))
+colnames(mpsexp1718) <- gsub("[., ï]", "",colnames(mpsexp1718))
+colnames(mpsexp1819) <- gsub("[., ï]", "",colnames(mpsexp1819))
+colnames(mpsexp1920) <- gsub("[., ï]", "",colnames(mpsexp1920))
+colnames(mpsexp2021) <- gsub("[., ï]", "",colnames(mpsexp2021))
+```
+
+
+##While the colnames have been cleaned up to make analysis much easier, now let's find out individually which Birmingham MP's have claimed the most amount in expenses from 2016/17 to 2020/21.
+
+
+2016/17 expenses for Birmingham MPs (inc Sutton Coldfield).
+```{r}
+bhammps1617amcl <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)       AS total FROM mpsexp1617
+      WHERE MPsConstituency LIKE "%Birmingham%" 
+      OR MPsConstituency LIKE "%Sutton Coldfield%"
+      GROUP BY MPsName
+      ORDER BY SUM(AmountClaimed) DESC')
+```
+
+2017/18 expenses for Birmingham MPs (inc Sutton Coldfield).
+
+```{r}
+bhammps1718amcl <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)       AS total FROM mpsexp1718
+      WHERE MPsConstituency LIKE "%Birmingham%" 
+      OR MPsConstituency LIKE "%Sutton Coldfield%"
+      GROUP BY MPsName
+      ORDER BY SUM(AmountClaimed) DESC')
+```
+
+2018/19 expenses for Birmingham MPs (inc Sutton Coldfield).
+```{r}
+bhammps1819amcl <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)       AS total FROM mpsexp1819
+      WHERE MPsConstituency LIKE "%Birmingham%" 
+      OR MPsConstituency LIKE "%Sutton Coldfield%"
+      GROUP BY MPsName
+      ORDER BY SUM(AmountClaimed) DESC')
+```
+
+2019/20 expenses for Birmingham MPs (inc Sutton Coldfield).
+```{r}
+bhammps1920amcl <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)       AS total FROM mpsexp1920
+      WHERE MPsConstituency LIKE "%Birmingham%" 
+      OR MPsConstituency LIKE "%Sutton Coldfield%"
+      GROUP BY MPsName
+      ORDER BY SUM(AmountClaimed) DESC')
+```
+
+2020/21 expenses for Birmingham MPs (inc Sutton Coldfield).
+```{r}
+bhammps2021amcl <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)       AS total FROM mpsexp2021
+      WHERE MPsConstituency LIKE "%Birmingham%" 
+      OR MPsConstituency LIKE "%Sutton Coldfield%"
+      GROUP BY MPsName
+      ORDER BY SUM(AmountClaimed) DESC')
+```
+
+Now, I want to know how much Khalid Mahmood claimed most in expenses by category.
+
+```{r}
+pbmp2021 <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                  AS Total, Category FROM mpsexp2021
+                  WHERE MPsName LIKE "%Khalid Mahmood%"
+                  GROUP BY Category
+                  ORDER BY SUM(AmountClaimed) DESC')
+```
+
+It seems the MP for Perry Barr has claimed the most on expenses by office costs. Let's find out what he has claimed in detail.
+
+```{r}
+pbmp2021catbd <- sqldf('SELECT Date, MPsName, MPsConstituency, AmountClaimed
+                       , Category, Details FROM mpsexp2021
+                       WHERE MPsName LIKE "%Khalid Mahmood%"
+                       ORDER BY AmountClaimed DESC')
+```
+
+The MP for Perry Barr had claimed £7,500 on staffing in his top three list for expenses, which comes under the staffing category.
+
+#Let's find out how much Shabana Mahmood (not related to Khalid Mahmood), the Labour MP for Birmingham Ladywood claimed in Expenses.
+
+```{r}
+lwmp2021 <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                  AS Total, Category FROM mpsexp2021
+                  WHERE MPsName LIKE "%Shabana Mahmood%"
+                  GROUP BY Category
+                  ORDER BY SUM(AmountClaimed) DESC')
+```
+
+
+Now, let's breakdown the largest amount claimed for the Birmingham Ladywood MP.
+
+```{r}
+lwmp2021catbd <- sqldf('SELECT Date, MPsName, MPsConstituency, AmountClaimed
+                       , Category, Details FROM mpsexp2021
+                       WHERE MPsName LIKE "%Shabana Mahmood%"
+                       ORDER BY AmountClaimed DESC')
+```
+
+#Shabana Mahmood claimed an expense for staffing which has topped the list. Now, let's break down Preet Gill's expenses claimed, the MP for Birmingham Edgbaston.
+
+```{r}
+edgmp2021 <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                  AS Total, Category FROM mpsexp2021
+                  WHERE MPsName LIKE "%Preet Gill%"
+                  GROUP BY Category
+                  ORDER BY SUM(AmountClaimed) DESC')
+```
+
+Ms Gill has claimed the most on expenses on accommodation, but let's break this down even further to find out more.
+
+```{r}
+edgmp2021catbd <- sqldf('SELECT Date, MPsName, MPsConstituency, AmountClaimed
+                       , Category, Details FROM mpsexp2021
+                       WHERE MPsName LIKE "%Preet Gill%"
+                       ORDER BY AmountClaimed DESC')
+```
+
+
+#Great, now let's do this for the last four years with MPs expenses in Birmingham. Shabana Mahmood for 2019/20.
+
+```{r}
+bhamlwmp1920 <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                  AS Total, Category FROM mpsexp1920
+                  WHERE MPsName LIKE "%Shabana Mahmood%"
+                  GROUP BY Category
+                  ORDER BY SUM(AmountClaimed) DESC')
+```
+
+Staffing tops the category for Shabana Mahmood in 2019/20 for B'ham MPs. Let's break it down by detail.
+
+```{r}
+bhamlwmp1920catbd <- sqldf('SELECT MPsName, MPsConstituency, AmountClaimed
+                  , Category, Details FROM mpsexp1920
+                  WHERE MPsName LIKE "%Shabana Mahmood%"
+                  ORDER BY AmountClaimed DESC')
+```
+
+#Lovely, now that's done. Let's get this done for the last three years.
+
+```{r}
+bhamedgmp1819cat <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                  AS Total, Category FROM mpsexp1819
+                  WHERE MPsName LIKE "%Preet Gill%"
+                  GROUP BY Category
+                  ORDER BY SUM(AmountClaimed) DESC')
+```
+
+Preet Gill topped the list for 2018/19, let's break this down by details.
+
+```{r}
+bhamedgmp1819catdb <- sqldf('SELECT MPsName, MPsConstituency, AmountClaimed
+                  , Category, Details FROM mpsexp1819
+                  WHERE MPsName LIKE "%Preet Gill%"
+                  ORDER BY AmountClaimed DESC')
+```
+
+#Shabana Mahmood topped the list for 2017/18 expenses claimed by Birmingham MPs. Let's break this down by category and detail
+
+```{r}
+bhamlwmp1718cat <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                  AS Total, Category FROM mpsexp1718
+                  WHERE MPsName LIKE "%Shabana Mahmood%"
+                  GROUP BY Category
+                  ORDER BY SUM(AmountClaimed) DESC')
+```
+
+```{r}
+bhamlwmp1718catbd <- sqldf('SELECT MPsName, MPsConstituency, AmountClaimed
+                  , Category, Details FROM mpsexp1718
+                  WHERE MPsName LIKE "%Shabana Mahmood%"
+                  ORDER BY AmountClaimed DESC')
+```
+
+#For 2016/17, Shabana Mahmood topped the list for expenses claimed for Birmingham MPs. Out of the last five years, Ms Mahmood has topped the list for Birmingham MPs who have claimed the most amount in expenses. But what did he claim by category and details.
+
+```{r}
+bhamlwmp1617cat <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                  AS Total, Category FROM mpsexp1617
+                  WHERE MPsName LIKE "%Shabana Mahmood%"
+                  GROUP BY Category
+                  ORDER BY SUM(AmountClaimed) DESC')
+```
+
+```{r}
+bhamlwmp1617catbd <- sqldf('SELECT MPsName, MPsConstituency, AmountClaimed
+                  ,Category, Details FROM mpsexp1718
+                  WHERE MPsName LIKE "%Shabana Mahmood%"
+                  ORDER BY AmountClaimed DESC')
+```
+
+#Now that we have the data ready, I want to pop it into a CSV. Let's write individual files for this.
+
+```{r}
+write.csv(bhammps2021amcl, "bhammps2021amcl.csv")
+write.csv(bhammps1920amcl, "bhammps1920amcl.csv")
+write.csv(bhammps1819amcl, "bhammps1819amcl.csv")
+write.csv(bhammps1718amcl, "bhammps1718amcl.csv")
+write.csv(bhammps1617amcl, "bhammps1617amcl.csv")
+```
+
+#Now, let's do the same thing with the categories
+
+```{r}
+write.csv(pbmp2021, "pbmp2021exp.csv")
+write.csv(lwmp2021, "lwmp2021exp.csv")
+write.csv(edgmp2021, "edgmp202exp.csv")
+write.csv(bhamlwmp1617cat, "lwmp1617.csv")
+write.csv(bhamlwmp1718cat, "lwmp1718.csv")
+write.csv(bhamedgmp1819cat, "edgmp1819.csv")
+write.csv(bhamlwmp1920, "lwmp1920.csv")
+```
+
+Finally, let's break this down by expense.
+
+```{r}
+write.csv(pbmp2021catbd, "pbmpcatbd2021.csv")
+write.csv(lwmp2021catbd, "lwmpcatbd2021.csv")
+write.csv(edgmp2021catbd, "edgmpcatbd2021.csv")
+```
+

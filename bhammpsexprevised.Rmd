@@ -1,0 +1,47 @@
+---
+title: "bhammpsexpensesrevised"
+author: "Umar Hassan"
+date: "12 January 2021"
+output: html_document
+---
+
+##This is a revised markdown document, looking at the MPs expenses for Birmingham MPs over the calendar years for 2016/17 to 2020/21.
+
+First, I want to load the packages I will be using to do my analysis.
+
+```{r}
+library(tidyverse)
+library(sqldf)
+```
+
+##Now, I want to load the datasets, I will be using to do my analysis for the MPs expenses.
+
+```{r}
+mpsexp1617 <- read.csv("Individual_claims_for_16_17.csv", stringsAsFactors = FALSE)
+mpsexp1718 <- read.csv("Individual_claims_for_17_18.csv", stringsAsFactors = FALSE)
+mpsexp1819 <- read.csv("Individual_claims_for_18_19.csv", stringsAsFactors = FALSE)
+mpsexp1920 <- read.csv("Individual_claims_for_19_20.csv", stringsAsFactors = FALSE)
+mpsexp2021 <- read.csv("Individual_claims_for_20_21.csv", stringsAsFactors = FALSE)
+```
+
+#What I want to do now is clean up the colnames so it makes it easier to analyse the data in SQL.
+
+For this, I will use regex and gsub to remove periods in the colnames to make it easier to do commands in SQL.
+
+```{r}
+colnames(mpsexp1617) <- gsub("[., ï]", "",colnames(mpsexp1617))
+colnames(mpsexp1718) <- gsub("[., ï]", "",colnames(mpsexp1718))
+colnames(mpsexp1819) <- gsub("[., ï]", "",colnames(mpsexp1819))
+colnames(mpsexp1920) <- gsub("[., ï]", "",colnames(mpsexp1920))
+colnames(mpsexp2021) <- gsub("[., ï]", "",colnames(mpsexp2021))
+```
+
+#Excellent, now we're getting somewhere. For the amount claimed by Birmingham MPs, I want to do a SQL command to find out which MPs are the least and most expensive for the latest calendar year?
+
+```{r}
+amclbhammps2021 <- sqldf('SELECT Date
+                         FROM mpsexp2021
+                         WHERE Date >= 03/01/2020 AND Date <= 08/12/2020')
+
+```
+

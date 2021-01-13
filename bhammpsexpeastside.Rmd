@@ -1,0 +1,82 @@
+---
+title: "bhammpsexp"
+author: "Umar Hassan"
+date: "13 January 2021"
+output: html_document
+---
+
+##After getting my figures completely wrong for the MPs expenses, I will attempt to rectify this by redoing my analysis for Birmingham-based MPs expenses, finding out which MPs have claimed the most in expenses in Birmingham.
+
+First, let's load the packages I will be using to do my analysis in R and SQL.
+
+```{r}
+library(sqldf)
+library(tidyverse)
+```
+
+
+```{r}
+mpsexp2021 <- read.csv("Individual_claims_for_20_21.csv", stringsAsFactors = FALSE)
+mpsexp1920 <- read.csv("Individual_claims_for_19_20.csv", stringsAsFactors = FALSE)
+mpsexp1819 <- read.csv("Individual_claims_for_18_19.csv", stringsAsFactors = FALSE)
+mpsexp1718 <- read.csv("Individual_claims_for_17_18.csv", stringsAsFactors = FALSE)
+mpsexp1617 <- read.csv("Individual_claims_for_19_20.csv", stringsAsFactors = FALSE)
+
+```
+
+
+#Now, what I need to do next is clean up the colnames using gsub and regex to do this.
+
+```{r}
+colnames(mpsexp1617) <- gsub("[., ï]", "",colnames(mpsexp1617))
+colnames(mpsexp1718) <- gsub("[., ï]", "",colnames(mpsexp1718))
+colnames(mpsexp1819) <- gsub("[., ï]", "",colnames(mpsexp1819))
+colnames(mpsexp1920) <- gsub("[., ï]", "",colnames(mpsexp1920))
+colnames(mpsexp2021) <- gsub("[., ï]", "",colnames(mpsexp2021))
+```
+
+#Great, this will make it easier to analyse the data I will be looking at for MPs expenses in Birmingham.
+
+```{r}
+amclbhammps2021 <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                         FROM mpsexp2021
+                         WHERE MPsConstituency LIKE "%Birmingham%"
+                         OR MPsConstituency LIKE "%Sutton Coldfield%"
+                         GROUP BY MPsName
+                         ORDER BY SUM(AmountClaimed) DESC')
+```
+
+#Lovely, I have identified that Khalid Mahmood has topped the list of Birmingham-based MPs who have claimed expenses for the 2020/21 financial year.
+
+Now, let's find out the previous years.
+
+```{r}
+amclbhammps1920 <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed)
+                         FROM mpsexp1920
+                         WHERE MPsConstituency LIKE "%Birmingham%"
+                         OR MPsConstituency LIKE "%Sutton Coldfield%"
+                         GROUP BY MPsName
+                         ORDER BY SUM(AmountClaimed) DESC')
+
+```
+
+
+##The problem I have had is the original figure is not outputting what I want. So, I'll need to check Khalid Mahmood's figure for the same issue.
+
+```{r}
+pbmp1920 <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed) AS Total
+                  FROM mpsexp1920
+                  WHERE MPsName LIKE "%Khalid Mahmood%"
+                  ORDER BY SUM(AmountClaimed) DESC')
+
+bhammps1920 <- sqldf('SELECT MPsName, MPsConstituency, SUM(AmountClaimed) AS Total
+                  FROM mpsexp1920
+                  WHERE MPsConstituency LIKE "%Birmingham%"
+                  OR MPsConstituency LIKE "%Sutton Coldfield%"
+                  GROUP BY MPsName
+                  ORDER BY SUM(AmountClaimed) DESC')
+
+bhammps1920 <- sqldf('')
+
+```
+
